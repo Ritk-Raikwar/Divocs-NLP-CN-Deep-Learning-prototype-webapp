@@ -1,0 +1,161 @@
+{% extends "layout.html" %}
+
+{% block title %}Sentiment Analysis{% endblock %}
+
+{% block content %}
+    <section class="sentiment-analysis-section">
+        <div class="container">
+            <div class="section-header text-center mb-5">
+                <h1>Video Sentiment Analysis</h1>
+                <p class="lead">Upload a video (1-2 minutes) to analyze facial expressions, emotions, and scene context.</p>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <form id="uploadForm" enctype="multipart/form-data">
+                        <div class="upload-area text-center" id="dropZone">
+                            <i class="fas fa-video fa-3x mb-3" style="color: #007bff;"></i>
+                            <h3>Drag & Drop Video</h3>
+                            <p>or</p>
+                            <label for="videoUpload" class="btn btn-outline-primary mb-3">Choose File</label>
+                            <input type="file" id="videoUpload" name="video" accept=".mp4,.avi,.mov,.mkv" class="form-control">
+                            <p id="fileInfo">No file chosen</p>
+                            <p class="text-muted">Supported formats: MP4, AVI, MOV, MKV (max 300MB)</p>
+                            <button type="submit" class="btn btn-primary mt-3" id="analyzeButton" disabled>Analyze Video</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="row justify-content-center mt-5">
+                <div class="col-md-4">
+                    <div class="features-card">
+                        <h3>Features:</h3>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check"></i> Facial expression analysis</li>
+                            <li><i class="fas fa-check"></i> Emotion detection across video timeline</li>
+                            <li><i class="fas fa-check"></i> Scene context understanding</li>
+                            <li><i class="fas fa-check"></i> Comprehensive sentiment summary</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {% block extra_css %}
+        <style>
+            .sentiment-analysis-section {
+                padding: 80px 0;
+                background: #f8f9fa;
+            }
+            .upload-area {
+                background: #fff;
+                border: 2px dashed #ddd;
+                border-radius: 10px;
+                padding: 40px;
+                min-height: 300px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                transition: border-color 0.3s;
+            }
+            .upload-area.dragover {
+                border-color: #007bff;
+                background: #e9f0ff;
+            }
+            .upload-area input[type="file"] {
+                display: none;
+            }
+            .features-card {
+                background: #fff;
+                border: 1px solid #ddd;
+                border-radius: 10px;
+                padding: 20px;
+                text-align: left;
+            }
+            .features-card ul li {
+                margin-bottom: 10px;
+                color: #666;
+            }
+            .features-card ul li i {
+                color: #007bff;
+                margin-right: 10px;
+            }
+            @media (max-width: 768px) {
+                .col-md-6 {
+                    flex: 0 0 100%;
+                    max-width: 100%;
+                }
+            }
+        </style>
+    {% endblock %}
+
+    {% block extra_js %}
+        <script>
+            const dropZone = document.getElementById('dropZone');
+            const videoUpload = document.getElementById('videoUpload');
+            const uploadForm = document.getElementById('uploadForm');
+            const analyzeButton = document.getElementById('analyzeButton');
+            const fileInfo = document.getElementById('fileInfo');
+
+            // Handle drag and drop
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('dragover');
+            });
+
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('dragover');
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    videoUpload.files = files;
+                    fileInfo.textContent = `Selected file: ${files[0].name}`;
+                    analyzeButton.disabled = false;
+                }
+            });
+
+            // Handle file input change
+            videoUpload.addEventListener('change', () => {
+                if (videoUpload.files.length > 0) {
+                    fileInfo.textContent = `Selected file: ${videoUpload.files[0].name}`;
+                    analyzeButton.disabled = false;
+                } else {
+                    fileInfo.textContent = 'No file chosen';
+                    analyzeButton.disabled = true;
+                }
+            });
+
+            // Handle form submission
+            uploadForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const formData = new FormData(uploadForm);
+                fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    document.open();
+                    document.write(html);
+                    document.close();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while uploading the video. Please try again.');
+                });
+            });
+        </script>
+    {% endblock %}
+{% endblock %}

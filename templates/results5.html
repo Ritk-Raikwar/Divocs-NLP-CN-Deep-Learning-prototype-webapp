@@ -1,0 +1,245 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script>{% extends 'layout.html' %}
+{% block title %}Handwriting Recognition Results{% endblock %}
+{% block extra_css %}
+<style>
+    .header {
+        background: linear-gradient(to right, #4568dc, #b06ab3);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        border-radius: 0 0 15px 15px;
+    }
+    .main-container {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    .chart-container {
+        position: relative;
+        height: 300px;
+        margin-bottom: 1.5rem;
+    }
+    .summary-card {
+        border-left: 5px solid #b06ab3;
+        background-color: #f8f9fa;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 5px;
+    }
+    .text-preview {
+        max-height: 400px;
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+        padding: 1rem;
+        border-radius: 5px;
+    }
+    .image-preview {
+        max-width: 100%;
+        border-radius: 5px;
+    }
+    .stats-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    .stats-icon {
+        font-size: 1.5rem;
+        margin-right: 1rem;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #e9ecef;
+        border-radius: 50%;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<!-- Header Section -->
+<div class="header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1>Handwriting Recognition Results</h1>
+                <p class="lead mb-0">Digitized text from your handwritten document</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="{{ url_for('home') }}" class="btn btn-light">
+                    <i class="fas fa-home me-2"></i>Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Image and Key Stats -->
+    <div class="row">
+        <!-- Image Preview -->
+        <div class="col-md-6 mb-4">
+            <div class="main-container">
+                <h3><i class="fas fa-image me-2"></i>Original Handwritten Document</h3>
+                <img class="image-preview mt-3" src="{{ url_for('static', filename='uploads/' + image_path) }}" alt="Handwritten Document">
+                <div class="text-center mt-2">
+                    <small class="text-muted">{{ image_filename }}</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Key Stats Summary -->
+        <div class="col-md-6 mb-4">
+            <div class="main-container">
+                <h3><i class="fas fa-chart-pie me-2"></i>Key Findings</h3>
+                <div class="summary-card mt-3">
+                    <div class="stats-item">
+                        <div class="stats-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0">Characters Recognized</h5>
+                            <p class="mb-0"><strong>{{ summary.total_chars|default(0) }}</strong></p>
+                        </div>
+                    </div>
+                    <div class="stats-item">
+                        <div class="stats-icon">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0">Accuracy</h5>
+                            <p class="mb-0"><strong>{{ summary.accuracy|default(0)|round(1) }}%</strong></p>
+                        </div>
+                    </div>
+                    <div class="stats-item">
+                        <div class="stats-icon">
+                            <i class="fas fa-language"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0">Detected Language</h5>
+                            <p class="mb-0"><strong>{{ summary.language|default('Unknown') }}</strong></p>
+                        </div>
+                    </div>
+                    <div class="stats-item">
+                        <div class="stats-icon">
+                            <i class="fas fa-download"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0">Download Text</h5>
+                            <p class="mb-0"><a href="{{ url_for('static', filename='results/ocr/' + analysis_id + '_text.txt') }}" class="btn btn-sm btn-primary">Download</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Text Analysis Section -->
+    <div class="row">
+        <!-- Accuracy Chart -->
+        <div class="col-md-6 mb-4">
+            <div class="main-container">
+                <h3><i class="fas fa-chart-bar me-2"></i>Recognition Accuracy</h3>
+                <div class="chart-container">
+                    <canvas id="accuracyChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Text Preview -->
+        <div class="col-md-6 mb-4">
+            <div class="main-container">
+                <h3><i class="fas fa-file-alt me-2"></i>Recognized Text</h3>
+                <div class="text-preview mt-3">
+                    <p>{{ summary.recognized_text|default('No text recognized.') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Analysis Metadata -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="main-container">
+                <h3><i class="fas fa-info-circle me-2"></i>Analysis Details</h3>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <ul class="list-group">
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Analysis ID</span>
+                                <span class="text-muted">{{ analysis_id }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Image file</span>
+                                <span class="text-muted">{{ image_filename }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-group">
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Analysis time</span>
+                                <span class="text-muted">{{ summary.analysis_duration|round(2)|default(0) }} seconds</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('home') }}" class="btn btn-primary">
+                        <i class="fas fa-home me-2"></i>Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" defer></script>
+<script src="https://js.puter.com/v2/" defer></script>
+<script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/chart.js') }}" defer></script>
+<script id="accuracyData" type="application/json">
+    {{ summary.accuracy_data|tojson|default('[]') }}
+</script>
+{% endblock %}

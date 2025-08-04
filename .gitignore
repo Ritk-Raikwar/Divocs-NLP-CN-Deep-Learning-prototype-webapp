@@ -1,0 +1,40 @@
+﻿# Virtual environments
+.venv/
+.venv_new/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.class
+*.so
+.pytest_cache/
+
+# Training data and datasets
+training/
+datasets/
+data/
+*.csv
+
+# Models (keep small ones, exclude large)
+models/*.bin
+models/*.safetensors
+models/*.ckpt
+models/*.pth
+
+# Build and temp
+build/
+dist/
+temp/
+tmp/
+
+# IDE and OS
+.vscode/
+.DS_Store
+Thumbs.db
+*.log
+
+# Results and uploads
+static/results/
+uploads/

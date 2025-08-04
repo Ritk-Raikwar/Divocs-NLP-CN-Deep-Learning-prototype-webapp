@@ -1,0 +1,185 @@
+{% extends "layout.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+    <!-- Hero Section -->
+    <header class="hero-section">
+        <div class="container h-100">
+            <div class="row h-100 align-items-center">
+                <div class="col-lg-6">
+                    <div class="hero-content">
+                        <h1 class="hero-title">Transform Videos & Documents with AI</h1>
+                        <p class="hero-subtitle">DIvocs uses advanced AI to analyze videos, extract insights, and convert between formats with unparalleled accuracy.</p>
+                        <div class="hero-buttons">
+                            <a href="{{ url_for('services') }}" class="btn btn-primary btn-lg">Explore Services</a>
+                            <a href="#learn-more" class="btn btn-outline-light btn-lg ms-3">Learn More</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 d-none d-lg-block">
+                    <div class="hero-image-container">
+                        <img src="https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="AI Video Analysis" class="img-fluid rounded hero-image">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="wave-shape">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+                <path fill="#ffffff" fill-opacity="1" d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,202.7C672,203,768,181,864,186.7C960,192,1056,224,1152,229.3C1248,235,1344,213,1392,202.7L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+            </svg>
+        </div>
+    </header>
+
+    <!-- Features Section -->
+    <section class="section features-section" id="learn-more">
+        <div class="container">
+            <div class="section-header text-center mb-5">
+                <h2>What DIvocs Can Do For You</h2>
+                <p class="lead">Our AI-powered platform revolutionizes how you work with videos and documents</p>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <h3>AI-Powered Analysis</h3>
+                        <p>Advanced neural networks analyze sentiment, context, and content from your videos with frame-by-frame precision.</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <h3>Smart Content Extraction</h3>
+                        <p>Extract text from educational videos and generate ready-to-use PDF documents automatically.</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-language"></i>
+                        </div>
+                        <h3>Perfect Dubbing</h3>
+                        <p>Translate videos while preserving the original speaker's tone, pitch, and emotion in multiple languages.</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-scroll"></i>
+                        </div>
+                        <h3>Video Summarization</h3>
+                        <p>Generate concise, accurate summaries of video content to quickly understand key points and themes.</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                        </div>
+                        <h3>Document to Video</h3>
+                        <p>Transform text documents into engaging educational videos with an AI teacher explaining content.</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-keyboard"></i>
+                        </div>
+                        <h3>Handwriting Digitization</h3>
+                        <p>Convert handwritten notes into digital text, preserving multi-language content exactly as written.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-5">
+                <a href="{{ url_for('services') }}" class="btn btn-primary btn-lg">Explore All Services</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="section how-it-works-section bg-light">
+        <div class="container">
+            <div class="section-header text-center mb-5">
+                <h2>How It Works</h2>
+                <p class="lead">Simple steps to transform your videos and documents</p>
+            </div>
+            
+            <div class="row align-items-center">
+                <div class="col-lg-6 order-lg-2">
+                    <div class="how-it-works-image">
+                        <img src="https://images.pexels.com/photos/7438103/pexels-photo-7438103.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="How DIvocs Works" class="img-fluid rounded">
+                    </div>
+                </div>
+                <div class="col-lg-6 order-lg-1">
+                    <div class="how-it-works-steps">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h3>Choose a Service</h3>
+                                <p>Select from our six AI-powered services based on your needs.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h3>Upload Your File</h3>
+                                <p>Upload your video or document in any common format.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h3>AI Processing</h3>
+                                <p>Our advanced neural networks analyze and process your content.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h3>Get Results</h3>
+                                <p>Download or view your transformed content with detailed insights.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container text-center">
+            <h2>Ready to Transform Your Content?</h2>
+            <p class="lead">Start using our AI-powered services today</p>
+            <a href="{{ url_for('services') }}" class="btn btn-primary btn-lg mt-3">Get Started</a>
+        </div>
+    </section>
+
+    {% block extra_js %}
+        <script>
+            // Add smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        </script>
+    {% endblock %}
+{% endblock %}

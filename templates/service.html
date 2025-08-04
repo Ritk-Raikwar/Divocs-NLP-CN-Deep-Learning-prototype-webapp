@@ -1,0 +1,157 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script>{% extends 'layout.html' %}
+{% block title %}DIvocs Services{% endblock %}
+{% block extra_css %}
+<style>
+    .header {
+        background: linear-gradient(to right, #1e3c72, #2a5298);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+        border-radius: 0 0 15px 15px;
+    }
+    .service-card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        transition: transform 0.3s;
+        margin-bottom: 2rem;
+        padding: 1.5rem;
+        text-align: center;
+    }
+    .service-card:hover {
+        transform: translateY(-5px);
+    }
+    .service-icon {
+        font-size: 2.5rem;
+        color: #2a5298;
+        margin-bottom: 1rem;
+    }
+    .btn-service {
+        background-color: #2a5298;
+        border-color: #2a5298;
+        color: white;
+        padding: 0.5rem 1.5rem;
+        font-weight: 500;
+    }
+    .btn-service:hover {
+        background-color: #1e3c72;
+        border-color: #1e3c72;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<!-- Header Section -->
+<div class="header">
+    <div class="container">
+        <h1 class="display-4">DIvocs Services</h1>
+        <p class="lead">Explore our AI-powered tools for video and document processing</p>
+    </div>
+</div>
+
+<!-- Services Section -->
+<div class="container">
+    <div class="row">
+        <!-- Text Extraction -->
+        <div class="col-md-4">
+            <div class="service-card">
+                <i class="fas fa-file-alt service-icon"></i>
+                <h3>Text Extraction</h3>
+                <p>Extract text and key terms from videos with high accuracy using AI.</p>
+                <a href="{{ url_for('text_extraction') }}" class="btn btn-service">Try Now</a>
+            </div>
+        </div>
+
+        <!-- Video Dubbing -->
+        <div class="col-md-4">
+            <div class="service-card">
+                <i class="fas fa-microphone service-icon"></i>
+                <h3>Video Dubbing</h3>
+                <p>Create dubbed videos in multiple languages with preserved voice characteristics.</p>
+                <a href="{{ url_for('dubbing') }}" class="btn btn-service">Try Now</a>
+            </div>
+        </div>
+
+        <!-- Video Summarization -->
+        <div class="col-md-4">
+            <div class="service-card">
+                <i class="fas fa-video service-icon"></i>
+                <h3>Video Summarization</h3>
+                <p>Generate concise summaries and key moments from your videos.</p>
+                <a href="{{ url_for('summarization') }}" class="btn btn-service">Try Now</a>
+            </div>
+        </div>
+
+        <!-- Document to Video -->
+        <div class="col-md-4">
+            <div class="service-card">
+                <i class="fas fa-chalkboard-teacher service-icon"></i>
+                <h3>Document to Video</h3>
+                <p>Convert documents into engaging educational videos with AI narration.</p>
+                <a href="{{ url_for('document_to_video') }}" class="btn btn-service">Try Now</a>
+            </div>
+        </div>
+
+        <!-- Handwriting Recognition -->
+        <div class="col-md-4">
+            <div class="service-card">
+                <i class="fas fa-pen service-icon"></i>
+                <h3>Handwriting Recognition</h3>
+                <p>Digitize handwritten notes with accurate text recognition.</p>
+                <a href="{{ url_for('handwriting_recognition') }}" class="btn btn-service">Try Now</a>
+            </div>
+        </div>
+
+        <!-- Video Sentiment Analysis -->
+        <div class="col-md-4">
+            <div class="service-card">
+                <i class="fas fa-brain service-icon"></i> <!-- Using brain icon as a placeholder for analysis -->
+                <h3>Video Sentiment Analysis</h3>
+                <p>Advanced neural networks analyze sentiment, context, and content from your videos with frame-by-frame precision.</p>
+                <a href="{{ url_for('video_sentiment') }}" class="btn btn-service">Try Now</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+{% endblock %}

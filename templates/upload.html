@@ -1,0 +1,89 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script>{% extends 'layout.html' %}
+{% block title %}Upload File - {{ feature }}{% endblock %}
+{% block extra_css %}
+<style>
+    .header {
+        background: linear-gradient(to right, #1e3c72, #2a5298);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        border-radius: 0 0 15px 15px;
+    }
+    .upload-container {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        padding: 2rem;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+</style>
+{% endblock %}
+{% block content %}
+<!-- Header Section -->
+<div class="header">
+    <div class="container">
+        <h1>{{ feature }}</h1>
+        <p class="lead">Upload your file to process with AI</p>
+    </div>
+</div>
+
+<!-- Upload Form -->
+<div class="container">
+    <div class="upload-container">
+        <h3>Upload File</h3>
+        {% if error %}
+        <div class="alert alert-danger" role="alert">
+            {{ error }}
+        </div>
+        {% endif %}
+        <form method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="file" class="form-label">Select file</label>
+                <input type="file" class="form-control" id="file" name="file" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Upload and Process</button>
+            <a href="{{ url_for('home') }}" class="btn btn-secondary">Back to Home</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
